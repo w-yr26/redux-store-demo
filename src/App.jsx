@@ -1,33 +1,58 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
+import { useSelector, useDispatch } from 'react-redux'
+import { removeTask, doneTask, addTask } from './store/slices/tasksSlice'
+import { useRef } from 'react'
 
-function App() {
-  const [count, setCount] = useState(0)
+const App = () => {
+  const taskList = useSelector((state) => state.task.taskList)
+  const dispatch = useDispatch()
+  const handleDel = (id) => {
+    dispatch(removeTask(id))
+  }
+  const handleDone = (id) => {
+    dispatch(doneTask(id))
+  }
+
+  const InputRef = useRef(null)
+  const handleAdd = () => {
+    console.log(InputRef.current.value)
+    const newTask = {
+      id: new Date().getTime(),
+      name: InputRef.current.value,
+      isFinish: false,
+    }
+    dispatch(addTask(newTask))
+  }
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+      <h3>TODO LIST</h3>
+      <div className="input-container">
+        <input type="text" ref={InputRef} />
+        <button onClick={handleAdd}>Add</button>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <ul className="container">
+        {taskList.map((item) => {
+          return (
+            <li
+              className="item-box"
+              key={item.id}
+              style={{
+                textDecoration: item.isFinish ? 'line-through' : '',
+              }}
+            >
+              <span>{item.name}</span>
+              <div>
+                <button onClick={() => handleDel(item.id)}>删除</button>
+                <button onClick={() => handleDone(item.id)}>
+                  {' '}
+                  {item.isFinish ? '未完成' : '完成'}{' '}
+                </button>
+              </div>
+            </li>
+          )
+        })}
+      </ul>
     </>
   )
 }
